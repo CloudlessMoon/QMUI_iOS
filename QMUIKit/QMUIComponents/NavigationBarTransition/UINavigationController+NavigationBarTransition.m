@@ -231,6 +231,8 @@ QMUISynthesizeIdStrongProperty(qmui_specifiedTextColor, setQmui_specifiedTextCol
     }
     
     _QMUITransitionNavigationBar *customBar = [[_QMUITransitionNavigationBar alloc] init];
+    /// iOS 26不设置items时子视图不会添加
+    customBar.items = @[[[UINavigationItem alloc] initWithTitle:@""]];
     customBar.parentViewController = self;
     self.transitionNavigationBar = customBar;
     

@@ -14,6 +14,7 @@
 
 #import "UITraitCollection+QMUI.h"
 #import "QMUICore.h"
+#import "UIApplication+QMUI.h"
 
 @implementation UITraitCollection (QMUI)
 
@@ -63,53 +64,28 @@ static NSString * const kQMUIUserInterfaceStyleWillChangeSelectorsKey = @"qmui_u
         static UIUserInterfaceStyle qmui_lastNotifiedUserInterfaceStyle;
         qmui_lastNotifiedUserInterfaceStyle = [UITraitCollection currentTraitCollection].userInterfaceStyle;
         
-        // - (void) _willTransitionToTraitCollection:(id)arg1 withTransitionCoordinator:(id)arg2; (0x7fff24711d49)
-        OverrideImplementation([UIWindow class], NSSelectorFromString([NSString qmui_stringByConcat:@"_", @"willTransitionToTraitCollection:", @"withTransitionCoordinator:", nil]), ^id(__unsafe_unretained Class originClass, SEL originCMD, IMP (^originalIMPProvider)(void)) {
-            return ^(UIWindow *selfObject, UITraitCollection *traitCollection, id <UIViewControllerTransitionCoordinator> coordinator) {
+        static NSArray<NSString *> *keyboardWindows;
+        keyboardWindows = @[@"UIRemoteKeyboardWindow", @"UITextEffectsWindow"];
+        
+        /// https://github.com/Tencent/QMUI_iOS/issues/1634
+        OverrideImplementation([UIViewController class], @selector(willTransitionToTraitCollection:withTransitionCoordinator:), ^id(__unsafe_unretained Class originClass, SEL originCMD, IMP (^originalIMPProvider)(void)) {
+            return ^(UIViewController *selfObject, UITraitCollection *newCollection, id<UIViewControllerTransitionCoordinatorContext> coordinator) {
                 
                 // call super
-                void (*originSelectorIMP)(id, SEL, UITraitCollection *, id <UIViewControllerTransitionCoordinator>);
-                originSelectorIMP = (void (*)(id, SEL, UITraitCollection *, id <UIViewControllerTransitionCoordinator>))originalIMPProvider();
-                originSelectorIMP(selfObject, originCMD, traitCollection, coordinator);
+                void (*originSelectorIMP)(id, SEL, UITraitCollection *, id<UIViewControllerTransitionCoordinatorContext>);
+                originSelectorIMP = (void (*)(id, SEL, UITraitCollection *, id<UIViewControllerTransitionCoordinatorContext>))originalIMPProvider();
+                originSelectorIMP(selfObject, originCMD, newCollection, coordinator);
                 
-                BOOL snapshotFinishedOnBackground = traitCollection.userInterfaceLevel == UIUserInterfaceLevelElevated && UIApplication.sharedApplication.applicationState == UIApplicationStateBackground;
-                // 进入后台且完成截图了就不继续去响应 style 变化（实测 iOS 13.0 iPad 进入后台并完成截图后，仍会多次改变 style，但是系统并没有调用界面的相关刷新方法）
-                if (selfObject.windowScene && !snapshotFinishedOnBackground) {
-                    UIWindow *firstValidatedWindow = nil;
-                    
-                    if ([NSStringFromClass(selfObject.class) containsString:@"_UIWindowSceneUserInterfaceStyle"]) { // _UIWindowSceneUserInterfaceStyleAnimationSnapshotWindow
-                        firstValidatedWindow = selfObject;
-                    } else {
-                        // 系统会按照这个数组的顺序去更新 window 的 traitCollection，找出最先响应样式更新的 window
-                        NSPointerArray *windows = [[selfObject windowScene] valueForKeyPath:@"_contextBinder._attachedBindables"];
-                        for (NSUInteger i = 0, count = windows.count; i < count; i++) {
-                            UIWindow *window = [windows pointerAtIndex:i];
-                            // 例如用 UIWindow 方式显示的弹窗，在消失后，在 windows 数组里会残留一个 nil 的位置，这里过滤掉，否则会导致 App 从桌面唤醒时无法立即显示正确的 style
-                            if (!window) {
-                                continue;;
-                            }
-                            
-                            // 由于 Keyboard 可以通过 keyboardAppearance 来控制 userInterfaceStyle 的 Dark/Light，不一定和系统一样，这里要过滤掉
-                            if ([window isKindOfClass:NSClassFromString(@"UIRemoteKeyboardWindow")] || [window isKindOfClass:NSClassFromString(@"UITextEffectsWindow")]) {
-                                continue;
-                            }
-                            if (window.overrideUserInterfaceStyle != UIUserInterfaceStyleUnspecified) {
-                                // 这里需要获取到和系统样式同步的 UserInterfaceStyle（所以指定 overrideUserInterfaceStyle 需要跳过）
-                                // 所以当全部 window.overrideUserInterfaceStyle 都指定为非 UIUserInterfaceStyleUnspecified 时将无法获得当前系统的外观
-                                continue;
-                            }
-                            firstValidatedWindow = window;
-                            break;
-                        }
-                    }
-                    
-                    if (selfObject == firstValidatedWindow) {
-                        if (qmui_lastNotifiedUserInterfaceStyle != traitCollection.userInterfaceStyle) {
-                            qmui_lastNotifiedUserInterfaceStyle = traitCollection.userInterfaceStyle;
-                            [self _qmui_notifyUserInterfaceStyleWillChangeEvents:traitCollection];
-                        }
-                    }
+                if (qmui_lastNotifiedUserInterfaceStyle == newCollection.userInterfaceStyle) {
+                    return;
                 }
+                UIWindow *window = selfObject.viewIfLoaded.window;
+                if (!window || [keyboardWindows containsObject:NSStringFromClass(window.class)] || window != UIApplication.sharedApplication.qmui_delegateWindow) {
+                    return;
+                }
+                qmui_lastNotifiedUserInterfaceStyle = newCollection.userInterfaceStyle;
+                
+                [self _qmui_notifyUserInterfaceStyleWillChangeEvents:newCollection];
             };
         });
     } oncePerIdentifier:@"UITraitCollection addUserInterfaceStyleWillChangeObserver"];

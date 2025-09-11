@@ -397,6 +397,19 @@ QMUISynthesizeIdStrongProperty(qcl_originalShadowColor, setQcl_originalShadowCol
             };
         });
         
+        OverrideImplementation([UIView class], @selector(setBackgroundColor:), ^id(__unsafe_unretained Class originClass, SEL originCMD, IMP (^originalIMPProvider)(void)) {
+            return ^(UIView *selfObject, UIColor *backgroundColor) {
+                
+                /// https://github.com/Tencent/QMUI_iOS/issues/1597
+                selfObject.layer.qcl_originalBackgroundColor = backgroundColor.qmui_isQMUIDynamicColor ? backgroundColor : nil;
+                
+                // call super
+                void (*originSelectorIMP)(id, SEL, UIColor *);
+                originSelectorIMP = (void (*)(id, SEL, UIColor *))originalIMPProvider();
+                originSelectorIMP(selfObject, originCMD, backgroundColor);
+            };
+        });
+       
         OverrideImplementation([CALayer class], @selector(setBorderColor:), ^id(__unsafe_unretained Class originClass, SEL originCMD, IMP (^originalIMPProvider)(void)) {
             return ^(CALayer *selfObject, CGColorRef color) {
                 

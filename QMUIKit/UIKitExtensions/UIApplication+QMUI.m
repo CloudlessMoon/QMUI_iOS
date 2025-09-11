@@ -45,4 +45,54 @@ QMUISynthesizeBOOLProperty(qmui_didFinishLaunching, setQmui_didFinishLaunching)
     [NSNotificationCenter.defaultCenter removeObserver:self name:UIApplicationDidFinishLaunchingNotification object:nil];
 }
 
+- (NSArray<__kindof UIWindow *> *)qmui_windows {
+    __block NSArray *windows = nil;
+    if (@available(iOS 13.0, *)) {
+        [self.connectedScenes enumerateObjectsUsingBlock:^(UIScene *scene, BOOL *stop) {
+            if ([scene isKindOfClass:UIWindowScene.class] && [scene.session.role isEqualToString:UIWindowSceneSessionRoleApplication]) {
+                windows = [(UIWindowScene *)scene windows];
+                *stop = YES;
+            }
+        }];
+    }
+    if (!windows || windows.count == 0) {
+        windows = self.windows;
+    }
+    return windows ? : @[];
+}
+
+- (nullable __kindof UIWindow *)qmui_keyWindow {
+    __block UIWindow *keyWindow = nil;
+    [self.qmui_windows enumerateObjectsUsingBlock:^(__kindof UIWindow *window, NSUInteger idx, BOOL *stop) {
+        if (window.isKeyWindow && !window.isHidden) {
+            keyWindow = window;
+            *stop = YES;
+        }
+    }];
+    if (!keyWindow) {
+        keyWindow = self.qmui_delegateWindow;
+    }
+    return keyWindow;
+}
+
+- (nullable __kindof UIWindow *)qmui_delegateWindow {
+    __block UIWindow *delegateWindow = nil;
+    if (@available(iOS 13.0, *)) {
+        [self.connectedScenes enumerateObjectsUsingBlock:^(UIScene *scene, BOOL *stop) {
+            if ([scene isKindOfClass:UIWindowScene.class] && [scene.session.role isEqualToString:UIWindowSceneSessionRoleApplication]) {
+                NSAssert(!scene.delegate || [scene.delegate respondsToSelector:@selector(window)], @"请检查是否有window属性");
+                if ([scene.delegate respondsToSelector:@selector(window)]) {
+                    delegateWindow = [scene.delegate performSelector:@selector(window)];
+                    *stop = YES;
+                }
+            }
+        }];
+    }
+    NSAssert(delegateWindow || !self.delegate || [self.delegate respondsToSelector:@selector(window)], @"请检查是否有window属性");
+    if (!delegateWindow && [self.delegate respondsToSelector:@selector(window)]) {
+        delegateWindow = [self.delegate performSelector:@selector(window)];
+    }
+    return delegateWindow;
+}
+
 @end

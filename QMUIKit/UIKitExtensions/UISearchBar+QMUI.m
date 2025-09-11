@@ -40,46 +40,86 @@ QMUISynthesizeCGFloatProperty(qmuisb_centerPlaceholderCachedWidth2, setQmuisb_ce
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         
-        void (^setupCancelButtonBlock)(UISearchBar *, UIButton *) = ^void(UISearchBar *searchBar, UIButton *cancelButton) {
-            if (searchBar.qmui_alwaysEnableCancelButton && !searchBar.qmui_searchController) {
-                cancelButton.enabled = YES;
-            }
-            
-            if (cancelButton && searchBar.qmui_cancelButtonFont) {
-                cancelButton.titleLabel.font = searchBar.qmui_cancelButtonFont;
-            }
-            
-            if (cancelButton && !cancelButton.qmui_frameWillChangeBlock) {
-                __weak __typeof(searchBar)weakSearchBar = searchBar;
-                cancelButton.qmui_frameWillChangeBlock = ^CGRect(UIButton *aCancelButton, CGRect followingFrame) {
-                    return [weakSearchBar qmuisb_adjustCancelButtonFrame:followingFrame];
+        if (QMUIHelper.isUsedLiquidGlass) {
+            ExtendImplementationOfVoidMethodWithoutArguments(NSClassFromString(@"_UISearchBarVisualProviderIOS"), NSSelectorFromString(@"setUpSearchField"), ^(NSObject *selfObject) {
+                UISearchBar *searchBar = [selfObject qmui_valueForKey:@"_searchBar"];
+                QMUIAssert([searchBar isKindOfClass:UISearchBar.class], @"UISearchBar (QMUI)", @"Can not find UISearchBar");
+                if (![searchBar isKindOfClass:UISearchBar.class]) {
+                    return;
+                }
+                if (searchBar.qmui_alwaysEnableCancelButton && !searchBar.qmui_searchController) {
+                    BOOL alwaysEnableCancelButton = YES;
+                    [selfObject qmui_performSelector:NSSelectorFromString(@"setShowsClearButtonWhenEmpty:") withArguments:&alwaysEnableCancelButton, nil];
+                }
+            });
+            OverrideImplementation([UISearchTextField class], @selector(addSubview:), ^id(__unsafe_unretained Class originClass, SEL originCMD, IMP (^originalIMPProvider)(void)) {
+                return ^(UISearchTextField *selfObject, UIView *subview) {
+                    
+                    // call super
+                    void (*originSelectorIMP)(id, SEL, UIView *);
+                    originSelectorIMP = (void (*)(id, SEL, UIView *))originalIMPProvider();
+                    originSelectorIMP(selfObject, originCMD, subview);
+                    
+                    if (![subview isKindOfClass:NSClassFromString(@"_UITextFieldClearButton")]) {
+                        return;
+                    }
+                    UISearchBar *searchBar = (UISearchBar *)selfObject.superview.superview.superview;
+                    QMUIAssert([searchBar isKindOfClass:UISearchBar.class], @"UISearchBar (QMUI)", @"Can not find UISearchBar from cancelButton");
+                    if (![searchBar isKindOfClass:UISearchBar.class]) {
+                        return;
+                    }
+                    UIButton *cancelButton = [searchBar qmui_cancelButton];
+                    if (cancelButton && searchBar.qmui_cancelButtonFont) {
+                        cancelButton.titleLabel.font = searchBar.qmui_cancelButtonFont;
+                    }
+                    if (cancelButton && !cancelButton.qmui_frameWillChangeBlock) {
+                        __weak __typeof(searchBar)weakSearchBar = searchBar;
+                        cancelButton.qmui_frameWillChangeBlock = ^CGRect(UIButton *aCancelButton, CGRect followingFrame) {
+                            return [weakSearchBar qmuisb_adjustCancelButtonFrame:followingFrame];
+                        };
+                    }
                 };
-            }
-        };
-        
-        // iOS 13 开始 UISearchBar 内部的输入框、取消按钮等 subviews 都由这个 class 创建、管理
-        ExtendImplementationOfVoidMethodWithoutArguments(NSClassFromString(@"_UISearchBarVisualProviderIOS"), NSSelectorFromString(@"setUpCancelButton"), ^(NSObject *selfObject) {
-            UIButton *cancelButton = [selfObject qmui_valueForKey:@"cancelButton"];
-            UISearchBar *searchBar = (UISearchBar *)cancelButton.superview.superview.superview;
-            QMUIAssert([searchBar isKindOfClass:UISearchBar.class], @"UISearchBar (QMUI)", @"Can not find UISearchBar from cancelButton");
-            setupCancelButtonBlock(searchBar, cancelButton);
-        });
-        
-        OverrideImplementation(NSClassFromString(@"UINavigationButton"), @selector(setEnabled:), ^id(__unsafe_unretained Class originClass, SEL originCMD, IMP (^originalIMPProvider)(void)) {
-            return ^(UIButton *selfObject, BOOL firstArgv) {
-                
-                UISearchBar *searchBar = (UISearchBar *)selfObject.superview.superview.superview;;
-                if ([searchBar isKindOfClass:UISearchBar.class] && searchBar.qmui_alwaysEnableCancelButton && !searchBar.qmui_searchController) {
-                    firstArgv = YES;
+            });
+        } else {
+            // iOS 13 开始 UISearchBar 内部的输入框、取消按钮等 subviews 都由这个 class 创建、管理
+            ExtendImplementationOfVoidMethodWithoutArguments(NSClassFromString(@"_UISearchBarVisualProviderIOS"), NSSelectorFromString(@"setUpCancelButton"), ^(NSObject *selfObject) {
+                UIButton *cancelButton = [selfObject qmui_valueForKey:@"cancelButton"];
+                UISearchBar *searchBar = (UISearchBar *)cancelButton.superview.superview.superview;
+                QMUIAssert([searchBar isKindOfClass:UISearchBar.class], @"UISearchBar (QMUI)", @"Can not find UISearchBar from cancelButton");
+                if (![searchBar isKindOfClass:UISearchBar.class]) {
+                    return;
+                }
+                if (searchBar.qmui_alwaysEnableCancelButton && !searchBar.qmui_searchController) {
+                    cancelButton.enabled = YES;
                 }
                 
-                // call super
-                void (*originSelectorIMP)(id, SEL, BOOL);
-                originSelectorIMP = (void (*)(id, SEL, BOOL))originalIMPProvider();
-                originSelectorIMP(selfObject, originCMD, firstArgv);
-            };
-        });
-        
+                if (cancelButton && searchBar.qmui_cancelButtonFont) {
+                    cancelButton.titleLabel.font = searchBar.qmui_cancelButtonFont;
+                }
+                
+                if (cancelButton && !cancelButton.qmui_frameWillChangeBlock) {
+                    __weak __typeof(searchBar)weakSearchBar = searchBar;
+                    cancelButton.qmui_frameWillChangeBlock = ^CGRect(UIButton *aCancelButton, CGRect followingFrame) {
+                        return [weakSearchBar qmuisb_adjustCancelButtonFrame:followingFrame];
+                    };
+                }
+            });
+            OverrideImplementation(NSClassFromString(@"UINavigationButton"), @selector(setEnabled:), ^id(__unsafe_unretained Class originClass, SEL originCMD, IMP (^originalIMPProvider)(void)) {
+                return ^(UIButton *selfObject, BOOL firstArgv) {
+                    
+                    UISearchBar *searchBar = (UISearchBar *)selfObject.superview.superview.superview;;
+                    if ([searchBar isKindOfClass:UISearchBar.class] && searchBar.qmui_alwaysEnableCancelButton && !searchBar.qmui_searchController) {
+                        firstArgv = YES;
+                    }
+                    
+                    // call super
+                    void (*originSelectorIMP)(id, SEL, BOOL);
+                    originSelectorIMP = (void (*)(id, SEL, BOOL))originalIMPProvider();
+                    originSelectorIMP(selfObject, originCMD, firstArgv);
+                };
+            });
+        }
+
         ExtendImplementationOfVoidMethodWithSingleArgument([UISearchBar class], @selector(setPlaceholder:), NSString *, (^(UISearchBar *selfObject, NSString *placeholder) {
             if (selfObject.qmui_placeholderColor || selfObject.qmui_font) {
                 NSMutableAttributedString *string = selfObject.searchTextField.attributedPlaceholder.mutableCopy;
@@ -334,8 +374,12 @@ static char kAssociatedObjectKey_font;
 }
 
 - (UIButton *)qmui_cancelButton {
-    UIButton *cancelButton = [self qmui_valueForKey:@"cancelButton"];
-    return cancelButton;
+    if (QMUIHelper.isUsedLiquidGlass) {
+        return [self.searchTextField qmui_valueForKey:@"_clearButton"];
+    } else {
+        UIButton *cancelButton = [self qmui_valueForKey:@"cancelButton"];
+        return cancelButton;
+    }
 }
 
 static char kAssociatedObjectKey_cancelButtonFont;

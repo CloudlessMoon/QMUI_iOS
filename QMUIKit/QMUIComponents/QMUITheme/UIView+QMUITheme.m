@@ -139,6 +139,15 @@ QMUISynthesizeIdCopyProperty(qmui_themeDidChangeBlock, setQmui_themeDidChangeBlo
         BOOL isValidatedImage = [value isKindOfClass:QMUIThemeImage.class] && (!manager || [((QMUIThemeImage *)value).managerName isEqual:manager.name]);
         BOOL isValidatedEffect = [value isKindOfClass:QMUIThemeVisualEffect.class] && (!manager || [((QMUIThemeVisualEffect *)value).managerName isEqual:manager.name]);
         BOOL isOtherObject = ![value isKindOfClass:UIColor.class] && ![value isKindOfClass:UIImage.class] && ![value isKindOfClass:UIVisualEffect.class];// 支持所有非 color、image、effect 的其他对象，例如 NSAttributedString
+        
+        // iOS 17，切换主题后图片没有更新
+        // https://github.com/Tencent/QMUI_iOS/issues/1507
+        if (@available(iOS 17.0, *)) {
+            if (isValidatedImage) {
+                value = [(QMUIThemeImage *)value copy];
+            }
+        }
+        
         if (isOtherObject || isValidatedColor || isValidatedImage || isValidatedEffect) {
             [self performSelector:setter withObject:value];
         }
