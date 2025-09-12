@@ -162,7 +162,8 @@ static char kAssociatedObjectKey_badgeOffsetLandscape;
 
 - (void)setQmui_badgeView:(__kindof UIView *)qmui_badgeView {
     self.qmui_view.qmui_badgeView = qmui_badgeView;
-    self.qmui_selectedView.qmui_badgeView = qmui_badgeView;
+    /// iOS 26，需要改成block？
+    // self.qmui_selectedView.qmui_badgeView = qmui_badgeView;
 }
 
 - (__kindof UIView *)qmui_badgeView {
@@ -187,6 +188,7 @@ static char kAssociatedObjectKey_shouldShowUpdatesIndicator;
         [self updateViewDidSetBlockIfNeeded];
     }
     self.qmui_view.qmui_shouldShowUpdatesIndicator = qmui_shouldShowUpdatesIndicator;
+    self.qmui_selectedView.qmui_shouldShowUpdatesIndicator = qmui_shouldShowUpdatesIndicator;
 }
 
 - (BOOL)qmui_shouldShowUpdatesIndicator {
@@ -197,6 +199,7 @@ static char kAssociatedObjectKey_updatesIndicatorColor;
 - (void)setQmui_updatesIndicatorColor:(UIColor *)qmui_updatesIndicatorColor {
     objc_setAssociatedObject(self, &kAssociatedObjectKey_updatesIndicatorColor, qmui_updatesIndicatorColor, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     self.qmui_view.qmui_updatesIndicatorColor = qmui_updatesIndicatorColor;
+    self.qmui_selectedView.qmui_updatesIndicatorColor = qmui_updatesIndicatorColor;
 }
 
 - (UIColor *)qmui_updatesIndicatorColor {
@@ -207,6 +210,7 @@ static char kAssociatedObjectKey_updatesIndicatorSize;
 - (void)setQmui_updatesIndicatorSize:(CGSize)qmui_updatesIndicatorSize {
     objc_setAssociatedObject(self, &kAssociatedObjectKey_updatesIndicatorSize, [NSValue valueWithCGSize:qmui_updatesIndicatorSize], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     self.qmui_view.qmui_updatesIndicatorSize = qmui_updatesIndicatorSize;
+    self.qmui_selectedView.qmui_updatesIndicatorSize = qmui_updatesIndicatorSize;
 }
 
 - (CGSize)qmui_updatesIndicatorSize {
@@ -217,6 +221,7 @@ static char kAssociatedObjectKey_updatesIndicatorOffset;
 - (void)setQmui_updatesIndicatorOffset:(CGPoint)qmui_updatesIndicatorOffset {
     objc_setAssociatedObject(self, &kAssociatedObjectKey_updatesIndicatorOffset, @(qmui_updatesIndicatorOffset), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     self.qmui_view.qmui_updatesIndicatorOffset = qmui_updatesIndicatorOffset;
+    self.qmui_selectedView.qmui_updatesIndicatorOffset = qmui_updatesIndicatorOffset;
 }
 
 - (CGPoint)qmui_updatesIndicatorOffset {
@@ -227,6 +232,7 @@ static char kAssociatedObjectKey_updatesIndicatorOffsetLandscape;
 - (void)setQmui_updatesIndicatorOffsetLandscape:(CGPoint)qmui_updatesIndicatorOffsetLandscape {
     objc_setAssociatedObject(self, &kAssociatedObjectKey_updatesIndicatorOffsetLandscape, @(qmui_updatesIndicatorOffsetLandscape), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     self.qmui_view.qmui_updatesIndicatorOffsetLandscape = qmui_updatesIndicatorOffsetLandscape;
+    self.qmui_selectedView.qmui_updatesIndicatorOffsetLandscape = qmui_updatesIndicatorOffsetLandscape;
 }
 
 - (CGPoint)qmui_updatesIndicatorOffsetLandscape {
@@ -235,6 +241,8 @@ static char kAssociatedObjectKey_updatesIndicatorOffsetLandscape;
 
 - (void)setQmui_updatesIndicatorView:(__kindof UIView *)qmui_updatesIndicatorView {
     self.qmui_view.qmui_updatesIndicatorView = qmui_updatesIndicatorView;
+    /// iOS 26，需要改成block？
+    // self.qmui_selectedView.qmui_updatesIndicatorView = qmui_updatesIndicatorView;
 }
 
 - (UIView *)qmui_updatesIndicatorView {
@@ -243,6 +251,7 @@ static char kAssociatedObjectKey_updatesIndicatorOffsetLandscape;
 
 - (void)setQmui_updatesIndicatorViewDidLayoutBlock:(void (^)(__kindof UIView * _Nonnull, __kindof UIView * _Nonnull))qmui_updatesIndicatorViewDidLayoutBlock {
     self.qmui_view.qmui_updatesIndicatorViewDidLayoutBlock = qmui_updatesIndicatorViewDidLayoutBlock;
+    self.qmui_selectedView.qmui_updatesIndicatorViewDidLayoutBlock = qmui_updatesIndicatorViewDidLayoutBlock;
 }
 
 - (void (^)(__kindof UIView * _Nonnull, __kindof UIView * _Nonnull))qmui_updatesIndicatorViewDidLayoutBlock {
