@@ -80,7 +80,6 @@ QMUISynthesizeBOOLProperty(qmui_didFinishLaunching, setQmui_didFinishLaunching)
     if (@available(iOS 13.0, *)) {
         [self.connectedScenes enumerateObjectsUsingBlock:^(UIScene *scene, BOOL *stop) {
             if ([scene isKindOfClass:UIWindowScene.class] && [scene.session.role isEqualToString:UIWindowSceneSessionRoleApplication]) {
-                NSAssert(!scene.delegate || [scene.delegate respondsToSelector:@selector(window)], @"请检查是否有window属性");
                 if ([scene.delegate respondsToSelector:@selector(window)]) {
                     delegateWindow = [scene.delegate performSelector:@selector(window)];
                     *stop = YES;
@@ -88,7 +87,6 @@ QMUISynthesizeBOOLProperty(qmui_didFinishLaunching, setQmui_didFinishLaunching)
             }
         }];
     }
-    NSAssert(delegateWindow || !self.delegate || [self.delegate respondsToSelector:@selector(window)], @"请检查是否有window属性");
     if (!delegateWindow && [self.delegate respondsToSelector:@selector(window)]) {
         delegateWindow = [self.delegate performSelector:@selector(window)];
     }
