@@ -101,6 +101,7 @@
 }
 
 - (void)setBackgroundView:(UIView *)backgroundView {
+    NSAssert(![backgroundView isKindOfClass:UIVisualEffectView.class], @"不支持UIVisualEffectView，请使用一个UIView代替，其subview可添加UIVisualEffectView");
     if (_backgroundView && _backgroundView != backgroundView) {
         [_backgroundView removeFromSuperview];
     }
