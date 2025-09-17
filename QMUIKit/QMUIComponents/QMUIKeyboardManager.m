@@ -874,6 +874,16 @@ static char kAssociatedObjectKey_KeyboardViewFrameObserver;
 }
 
 + (UIView *)inputSetHostViewInWindow:(UIWindow *)window {
+    if (QMUIHelper.isUsedLiquidGlass) {
+        UIView *result = [[window.subviews qmui_firstMatchWithBlock:^BOOL(__kindof UIView * _Nonnull subview) {
+            return [NSStringFromClass(subview.class) isEqualToString:@"UITrackingWindowView"];
+        }].subviews qmui_firstMatchWithBlock:^BOOL(__kindof UIView * _Nonnull subview) {
+            return [NSStringFromClass(subview.class) isEqualToString:@"UIKeyboardItemContainerView"] && subview.subviews.count;
+        }];
+        if (result) {
+            return result;
+        }
+    }
     UIView *result = [[window.subviews qmui_firstMatchWithBlock:^BOOL(__kindof UIView * _Nonnull subview) {
         return [NSStringFromClass(subview.class) isEqualToString:@"UIInputSetContainerView"];
     }].subviews qmui_firstMatchWithBlock:^BOOL(__kindof UIView * _Nonnull subview) {

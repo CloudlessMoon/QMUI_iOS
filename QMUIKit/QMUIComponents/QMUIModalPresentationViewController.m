@@ -76,6 +76,8 @@
 @property(nonatomic, strong) QMUIKeyboardManager *keyboardManager;
 @property(nonatomic, assign) CGFloat keyboardHeight;
 @property(nonatomic, assign) BOOL avoidKeyboardLayout;
+@property(nonatomic, assign) BOOL initializeKeyboardHeight;
+
 @end
 
 @implementation QMUIModalPresentationViewController
@@ -141,6 +143,16 @@
 
 - (void)viewDidLayoutSubviews {
     [super viewDidLayoutSubviews];
+    // 获取一次键盘高度，兼容键盘已经弹起时情况
+    if (!self.initializeKeyboardHeight) {
+        self.initializeKeyboardHeight = YES;
+        
+        CGRect keyboardRect = [QMUIKeyboardManager convertKeyboardRect:QMUIKeyboardManager.currentKeyboardFrame toView:self.view];
+        CGRect visibleRect = CGRectIntersection(CGRectFlatted(self.view.bounds), CGRectFlatted(keyboardRect));
+        if (CGRectIsValidated(visibleRect)) {
+            self.keyboardHeight = visibleRect.size.height;
+        }
+    }
     
     self.dimmingView.frame = self.view.bounds;
     
