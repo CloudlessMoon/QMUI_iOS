@@ -209,6 +209,8 @@ static char kAssociatedObjectKey_numberOfSteps;
             [self.qmuisl_stepControls removeObjectAtIndex:i];
         }
     }
+    [self qmuisl_updateStepControls];
+    
     if (self.qmui_stepControlConfiguration) {
         [self.qmuisl_stepControls enumerateObjectsUsingBlock:^(QMUISliderStepControl * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             self.qmui_stepControlConfiguration(self, obj, idx);
@@ -256,10 +258,7 @@ static char kAssociatedObjectKey_stepControlConfiguration;
     
     NSUInteger step = [slider qmuisl_stepWithValue:slider.value];
     if (step != slider.qmuisl_precedingStep) {
-        [self.qmuisl_stepControls enumerateObjectsUsingBlock:^(QMUISliderStepControl * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            obj.userInteractionEnabled = idx != step;// 让 stepControl 不要影响 thumbView 的事件
-            obj.indicator.hidden = idx == step;
-        }];
+        [self qmuisl_updateStepControls];
         
         if (slider.qmui_stepDidChangeBlock) {
             slider.qmui_stepDidChangeBlock(slider, slider.qmuisl_precedingStep);
@@ -279,6 +278,13 @@ static char kAssociatedObjectKey_stepControlConfiguration;
     CGFloat progress = value / (self.maximumValue - self.minimumValue);
     NSUInteger step = round(progress * (self.qmui_numberOfSteps - 1));
     return step;
+}
+
+- (void)qmuisl_updateStepControls {
+    [self.qmuisl_stepControls enumerateObjectsUsingBlock:^(QMUISliderStepControl * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        obj.userInteractionEnabled = idx != self.qmui_step;// 让 stepControl 不要影响 thumbView 的事件
+        obj.indicator.hidden = idx == self.qmui_step;
+    }];
 }
 
 - (void)qmuisl_swizzleForStepsIfNeeded {
