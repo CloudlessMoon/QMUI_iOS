@@ -281,9 +281,10 @@ static char kAssociatedObjectKey_stepControlConfiguration;
 }
 
 - (void)qmuisl_updateStepControls {
+    NSInteger step = self.qmui_step;
     [self.qmuisl_stepControls enumerateObjectsUsingBlock:^(QMUISliderStepControl * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        obj.userInteractionEnabled = idx != self.qmui_step;// 让 stepControl 不要影响 thumbView 的事件
-        obj.indicator.hidden = idx == self.qmui_step;
+        obj.userInteractionEnabled = idx != step;// 让 stepControl 不要影响 thumbView 的事件
+        obj.indicator.hidden = idx == step;
     }];
 }
 
