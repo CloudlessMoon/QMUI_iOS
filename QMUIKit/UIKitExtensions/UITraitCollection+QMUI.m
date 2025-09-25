@@ -64,11 +64,11 @@ static NSString * const kQMUIUserInterfaceStyleWillChangeSelectorsKey = @"qmui_u
     static NSSet<NSString *> *keyboardWindows;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        currentUserInterfaceStyle = -1;
+        currentUserInterfaceStyle = UIUserInterfaceStyleUnspecified;
         keyboardWindows = [NSSet setWithArray:@[@"UIRemoteKeyboardWindow", @"UITextEffectsWindow", @"UITrackingWindowView"]];
     });
     
-    UITraitCollection *traitCollection = UITraitCollection.currentTraitCollection;
+    UITraitCollection *traitCollection = UIScreen.mainScreen.traitCollection;
     if (currentUserInterfaceStyle == traitCollection.userInterfaceStyle) {
         return;
     }

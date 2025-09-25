@@ -59,7 +59,7 @@ NSString *const QMUIThemeDidChangeNotification = @"QMUIThemeDidChangeNotificatio
 - (void)setRespondsSystemStyleAutomatically:(BOOL)respondsSystemStyleAutomatically {
     _respondsSystemStyleAutomatically = respondsSystemStyleAutomatically;
     if (_respondsSystemStyleAutomatically && self.identifierForTrait) {
-         self.currentThemeIdentifier = self.identifierForTrait([UITraitCollection currentTraitCollection]);
+        self.currentThemeIdentifier = self.identifierForTrait(UIScreen.mainScreen.traitCollection);
     }
 }
 
