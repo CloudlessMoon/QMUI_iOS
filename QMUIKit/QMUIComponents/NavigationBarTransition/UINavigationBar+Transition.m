@@ -276,6 +276,7 @@ static char kAssociatedObjectKey_copyStylesToBar;
         [super layoutSubviews];
         // 实测 iOS 11 Beta 1-5 里，自己 init 的 navigationBar.backgroundView.height 默认一直是 44，所以才加上这个兼容
         self.qmui_backgroundView.frame = self.bounds;
+        [self.qmui_backgroundView layoutIfNeeded];
     }];
 }
 
@@ -297,6 +298,7 @@ static char kAssociatedObjectKey_copyStylesToBar;
             // push/pop 过程中系统的导航栏转换过来的 x 可能是 112、-112
             // iOS 26上，y 可能是 -113
             self.frame = CGRectSetXY(rect, 0, 0);
+            [self layoutIfNeeded];
         }];
     }
 }
