@@ -690,10 +690,13 @@
 }
 
 - (void)showWithAnimated:(BOOL)animated completion:(void (^)(BOOL))completion {
-    
+    [self showInWindow:nil animated:animated completion:completion];
+}
+
+- (void)showInWindow:(nullable UIWindow *)window animated:(BOOL)animated completion:(void (^ __nullable)(BOOL finished))completion {
     BOOL isShowingByWindowMode = NO;
     if (!self.superview) {
-        [self initPopupContainerViewWindowIfNeeded];
+        [self initPopupContainerViewWindowInWindow:window];
         
         QMUICommonViewController *viewController = (QMUICommonViewController *)self.popupWindow.rootViewController;
         viewController.supportedOrientationMask = [QMUIHelper visibleViewController].supportedInterfaceOrientations;
@@ -829,9 +832,10 @@
     return subview && !subview.hidden && subview.superview;
 }
 
-- (void)initPopupContainerViewWindowIfNeeded {
+- (void)initPopupContainerViewWindowInWindow:(nullable UIWindow *)window {
     if (!self.popupWindow) {
-        self.popupWindow = [QMUIPopupContainerViewWindow qmui_windowWithWindowScene:UIApplication.sharedApplication.qmui_delegateWindow.windowScene];
+        UIWindowScene *windowScene = window.windowScene ? : UIApplication.sharedApplication.qmui_delegateWindow.windowScene;
+        self.popupWindow = [QMUIPopupContainerViewWindow qmui_windowWithWindowScene:windowScene];
         self.popupWindow.qmui_capturesStatusBarAppearance = NO;
         self.popupWindow.backgroundColor = UIColorClear;
         self.popupWindow.windowLevel = UIWindowLevelQMUIAlertView;

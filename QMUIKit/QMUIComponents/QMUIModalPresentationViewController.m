@@ -512,6 +512,10 @@
 }
 
 - (void)showWithAnimated:(BOOL)animated completion:(void (^)(BOOL))completion {
+    [self showInWindow:nil animated:animated completion:completion];
+}
+
+- (void)showInWindow:(nullable UIWindow *)window animated:(BOOL)animated completion:(void (^ _Nullable)(BOOL finished))completion {
     if (self.visible) return;
     self.visible = YES;
     
@@ -520,7 +524,8 @@
     self.appearCompletionBlock = completion;
     self.previousKeyWindow = UIApplication.sharedApplication.qmui_keyWindow;
     if (!self.window) {
-        self.window = [QMUIModalPresentationWindow qmui_windowWithWindowScene:UIApplication.sharedApplication.qmui_delegateWindow.windowScene];
+        UIWindowScene *windowScene = window.windowScene ? : UIApplication.sharedApplication.qmui_delegateWindow.windowScene;
+        self.window = [QMUIModalPresentationWindow qmui_windowWithWindowScene:windowScene];
         self.window.windowLevel = UIWindowLevelQMUIAlertView;
         self.window.backgroundColor = UIColorClear;// 避免横竖屏旋转时出现黑色
         [self updateWindowStatusBarCapture];

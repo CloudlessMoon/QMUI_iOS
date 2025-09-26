@@ -176,6 +176,8 @@ typedef NS_ENUM(NSUInteger, QMUIPopupContainerViewLayoutAlignment) {
 
 - (void)showWithAnimated:(BOOL)animated;
 - (void)showWithAnimated:(BOOL)animated completion:(void (^ __nullable)(BOOL finished))completion;
+- (void)showInWindow:(nullable UIWindow *)window animated:(BOOL)animated completion:(void (^ __nullable)(BOOL finished))completion;
+
 - (void)hideWithAnimated:(BOOL)animated;
 - (void)hideWithAnimated:(BOOL)animated completion:(void (^ __nullable)(BOOL finished))completion;
 - (BOOL)isShowing;
