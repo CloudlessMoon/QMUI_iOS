@@ -133,6 +133,7 @@
             [console initConsoleWindowIfNeeded];
             console.consoleWindow.alpha = 0;
             console.consoleWindow.hidden = NO;
+            console.consoleWindow.windowScene = UIApplication.sharedApplication.qmui_delegateWindow.windowScene;
         }];
         [UIView animateWithDuration:.25 delay:.2 options:QMUIViewAnimationOptionsCurveOut animations:^{
             console.consoleWindow.alpha = 1;
@@ -142,6 +143,7 @@
 
 + (void)hide {
     [QMUIConsole sharedInstance].consoleWindow.hidden = YES;
+    [QMUIConsole sharedInstance].consoleWindow.windowScene = nil;
 }
 
 - (void)initConsoleWindowIfNeeded {

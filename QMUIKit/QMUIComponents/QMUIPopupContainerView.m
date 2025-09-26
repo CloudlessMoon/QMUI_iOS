@@ -805,8 +805,8 @@
         [self removeFromSuperview];
         self.popupWindow.rootViewController = nil;
         
-        self.popupWindow.windowScene = nil;
         self.popupWindow.hidden = YES;
+        self.popupWindow.windowScene = nil;
         self.popupWindow = nil;
     } else {
         self.hidden = YES;

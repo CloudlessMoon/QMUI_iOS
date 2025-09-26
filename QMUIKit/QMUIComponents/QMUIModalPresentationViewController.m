@@ -293,6 +293,7 @@
                 }
             }
             self.window.hidden = YES;
+            self.window.windowScene = nil;
             self.window.rootViewController = nil;
             self.previousKeyWindow = nil;
             [self endAppearanceTransition];
