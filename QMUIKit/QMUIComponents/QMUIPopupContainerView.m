@@ -531,11 +531,11 @@
             // 上下都没有足够的空间，所以要调整maximumHeight
             CGFloat maximumHeightAbove = CGRectGetMinY(targetRect) - CGRectGetMinY(containerRect) - self.distanceBetweenSource - self.safetyMarginsAvoidSafeAreaInsets.top;
             CGFloat maximumHeightBelow = CGRectGetMaxY(containerRect) - self.safetyMarginsAvoidSafeAreaInsets.bottom - self.distanceBetweenSource - CGRectGetMaxY(targetRect);
-            self.maximumHeight = MAX(self.minimumHeight, MAX(maximumHeightAbove, maximumHeightBelow));
-            tipSize.height = self.maximumHeight;
+            CGFloat maximumHeight = MAX(self.minimumHeight, MAX(maximumHeightAbove, maximumHeightBelow));
+            tipSize.height = maximumHeight;
             _currentLayoutDirection = maximumHeightAbove > maximumHeightBelow ? QMUIPopupContainerViewLayoutDirectionAbove : QMUIPopupContainerViewLayoutDirectionBelow;
             
-            QMUILog(NSStringFromClass(self.class), @"%@, 因为上下都不够空间，所以最大高度被强制改为%@, 位于目标的%@", self, @(self.maximumHeight), maximumHeightAbove > maximumHeightBelow ? @"上方" : @"下方");
+            QMUILog(NSStringFromClass(self.class), @"%@, 因为上下都不够空间，所以最大高度被强制改为%@, 位于目标的%@", self, @(maximumHeight), maximumHeightAbove > maximumHeightBelow ? @"上方" : @"下方");
             
         } else if (_currentLayoutDirection == QMUIPopupContainerViewLayoutDirectionAbove && !canShowAtAbove) {
             _currentLayoutDirection = QMUIPopupContainerViewLayoutDirectionBelow;
@@ -599,11 +599,11 @@
             // 左右都没有足够的空间，所以要调整maximumWidth
             CGFloat maximumWidthLeft = CGRectGetMinX(targetRect) - CGRectGetMinX(containerRect) - self.distanceBetweenSource - self.safetyMarginsAvoidSafeAreaInsets.left;
             CGFloat maximumWidthRight = CGRectGetMaxX(containerRect) - self.safetyMarginsAvoidSafeAreaInsets.right - self.distanceBetweenSource - CGRectGetMaxX(targetRect);
-            self.maximumWidth = MAX(self.minimumWidth, MAX(maximumWidthLeft, maximumWidthRight));
-            tipSize.width = self.maximumWidth;
+            CGFloat maximumWidth = MAX(self.minimumWidth, MAX(maximumWidthLeft, maximumWidthRight));
+            tipSize.width = maximumWidth;
             _currentLayoutDirection = maximumWidthLeft > maximumWidthRight ? QMUIPopupContainerViewLayoutDirectionLeft : QMUIPopupContainerViewLayoutDirectionRight;
             
-            QMUILog(NSStringFromClass(self.class), @"%@, 因为左右都不够空间，所以最大宽度被强制改为%@, 位于目标的%@", self, @(self.maximumWidth), maximumWidthLeft > maximumWidthRight ? @"左边" : @"右边");
+            QMUILog(NSStringFromClass(self.class), @"%@, 因为左右都不够空间，所以最大宽度被强制改为%@, 位于目标的%@", self, @(maximumWidth), maximumWidthLeft > maximumWidthRight ? @"左边" : @"右边");
             
         } else if (_currentLayoutDirection == QMUIPopupContainerViewLayoutDirectionLeft && !canShowAtLeft) {
             _currentLayoutDirection = QMUIPopupContainerViewLayoutDirectionLeft;
