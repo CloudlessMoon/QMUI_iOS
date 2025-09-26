@@ -76,7 +76,7 @@
 @property(nonatomic, strong) QMUIKeyboardManager *keyboardManager;
 @property(nonatomic, assign) CGFloat keyboardHeight;
 @property(nonatomic, assign) BOOL avoidKeyboardLayout;
-@property(nonatomic, assign) BOOL initializeKeyboardHeight;
+@property(nonatomic, assign) CGFloat initializeKeyboardHeight; // 默认为-1
 
 @end
 
@@ -99,6 +99,7 @@
 - (void)didInitialize {
     [self qmui_applyAppearance];
     
+    self.initializeKeyboardHeight = -1;
     self.shouldDimmedAppAutomatically = YES;
     self.onlyRespondsToKeyboardEventFromDescendantViews = YES;
     self.shouldBecomeKeyWindow = YES;
@@ -144,14 +145,13 @@
 - (void)viewDidLayoutSubviews {
     [super viewDidLayoutSubviews];
     // 获取一次键盘高度，兼容键盘已经弹起时情况
-    if (!self.initializeKeyboardHeight) {
-        self.initializeKeyboardHeight = YES;
-        
+    if (self.initializeKeyboardHeight == -1) {
         CGRect keyboardRect = [QMUIKeyboardManager convertKeyboardRect:QMUIKeyboardManager.currentKeyboardFrame toView:self.view];
         CGRect visibleRect = CGRectIntersection(CGRectFlatted(self.view.bounds), CGRectFlatted(keyboardRect));
         if (CGRectIsValidated(visibleRect)) {
             self.keyboardHeight = visibleRect.size.height;
         }
+        self.initializeKeyboardHeight = self.keyboardHeight;
     }
     
     self.dimmingView.frame = self.view.bounds;
@@ -691,12 +691,14 @@
 #pragma mark - <QMUIKeyboardManagerDelegate>
 
 - (void)keyboardWillChangeFrameWithUserInfo:(QMUIKeyboardUserInfo *)keyboardUserInfo {
-    if (self.onlyRespondsToKeyboardEventFromDescendantViews) {
+    if (self.onlyRespondsToKeyboardEventFromDescendantViews && self.initializeKeyboardHeight == 0) {
         UIResponder *firstResponder = keyboardUserInfo.targetResponder;
         if (!firstResponder || !([firstResponder isKindOfClass:[UIView class]] && [(UIView *)firstResponder isDescendantOfView:self.view])) {
             return;
         }
     }
+    self.initializeKeyboardHeight = 0;
+    
     CGFloat keyboardHeight = [keyboardUserInfo heightInView:self.view];
     if (self.keyboardHeight != keyboardHeight) {
         self.keyboardHeight = keyboardHeight;
