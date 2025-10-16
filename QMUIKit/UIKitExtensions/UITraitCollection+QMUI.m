@@ -59,20 +59,9 @@ static NSString * const kQMUIUserInterfaceStyleWillChangeSelectorsKey = @"qmui_u
     }
 }
 
-+ (void)_qmui_notifyUserInterfaceStyleWithWindow:(UIWindow *)window {
-    static UIUserInterfaceStyle currentUserInterfaceStyle;
-    static NSSet<NSString *> *keyboardWindows;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        currentUserInterfaceStyle = UIUserInterfaceStyleUnspecified;
-        keyboardWindows = [NSSet setWithArray:@[@"UIRemoteKeyboardWindow", @"UITextEffectsWindow", @"UITrackingWindowView"]];
-    });
-    
-    UITraitCollection *traitCollection = UIScreen.mainScreen.traitCollection;
++ (void)_qmui_notifyUserInterfaceStyleWillChangeForTraitCollection:(UITraitCollection *)traitCollection {
+    static UIUserInterfaceStyle currentUserInterfaceStyle = UIUserInterfaceStyleUnspecified;
     if (currentUserInterfaceStyle == traitCollection.userInterfaceStyle) {
-        return;
-    }
-    if ([keyboardWindows containsObject:NSStringFromClass(window.class)] || window != UIApplication.sharedApplication.qmui_delegateWindow) {
         return;
     }
     currentUserInterfaceStyle = traitCollection.userInterfaceStyle;
@@ -83,16 +72,18 @@ static NSString * const kQMUIUserInterfaceStyleWillChangeSelectorsKey = @"qmui_u
 + (void)_qmui_overrideTraitCollectionMethodIfNeeded {
     [QMUIHelper executeBlock:^{
         /// https://github.com/Tencent/QMUI_iOS/issues/1634
-        NSString *willTransitionSel = [NSString qmui_stringByConcat:@"_", @"willTransitionToTraitCollection:", @"withTransitionCoordinator:", nil];
-        OverrideImplementation(UIWindow.class, NSSelectorFromString(willTransitionSel), ^id(__unsafe_unretained Class originClass, SEL originCMD, IMP (^originalIMPProvider)(void)) {
-            return ^(UIWindow *selfObject, UITraitCollection *newCollection, id<UIViewControllerTransitionCoordinatorContext> coordinator) {
+        NSString *willChangeTraitCollection = [NSString qmui_stringByConcat:@"_", @"setDefault", @"TraitCollection:", nil];
+        OverrideImplementation([UIScreen class], NSSelectorFromString(willChangeTraitCollection), ^id(__unsafe_unretained Class originClass, SEL originCMD, IMP (^originalIMPProvider)(void)) {
+            return ^(UIScreen *selfObject, UITraitCollection *traitCollection) {
                 
-                [UITraitCollection _qmui_notifyUserInterfaceStyleWithWindow:selfObject];
+                if (selfObject == UIScreen.mainScreen) {
+                    [UITraitCollection _qmui_notifyUserInterfaceStyleWillChangeForTraitCollection:traitCollection];
+                }
                 
                 // call super
-                void (*originSelectorIMP)(id, SEL, UITraitCollection *, id<UIViewControllerTransitionCoordinatorContext>);
-                originSelectorIMP = (void (*)(id, SEL, UITraitCollection *, id<UIViewControllerTransitionCoordinatorContext>))originalIMPProvider();
-                originSelectorIMP(selfObject, originCMD, newCollection, coordinator);
+                void (*originSelectorIMP)(id, SEL, UITraitCollection *);
+                originSelectorIMP = (void (*)(id, SEL, UITraitCollection *))originalIMPProvider();
+                originSelectorIMP(selfObject, originCMD, traitCollection);
             };
         });
     } oncePerIdentifier:@"UITraitCollection addUserInterfaceStyleWillChangeObserver"];
