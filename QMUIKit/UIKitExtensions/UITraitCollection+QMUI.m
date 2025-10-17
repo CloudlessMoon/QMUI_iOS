@@ -59,7 +59,7 @@ static NSString * const kQMUIUserInterfaceStyleWillChangeSelectorsKey = @"qmui_u
     }
 }
 
-+ (void)_qmui_notifyUserInterfaceStyleWillChangeForTraitCollection:(UITraitCollection *)traitCollection {
++ (void)_qmui_setUserInterfaceStyleForTraitCollection:(UITraitCollection *)traitCollection {
     static UIUserInterfaceStyle currentUserInterfaceStyle = UIUserInterfaceStyleUnspecified;
     if (currentUserInterfaceStyle == traitCollection.userInterfaceStyle) {
         return;
@@ -72,20 +72,37 @@ static NSString * const kQMUIUserInterfaceStyleWillChangeSelectorsKey = @"qmui_u
 + (void)_qmui_overrideTraitCollectionMethodIfNeeded {
     [QMUIHelper executeBlock:^{
         /// https://github.com/Tencent/QMUI_iOS/issues/1634
-        NSString *willChangeTraitCollection = [NSString qmui_stringByConcat:@"_", @"setDefault", @"TraitCollection:", nil];
-        OverrideImplementation([UIScreen class], NSSelectorFromString(willChangeTraitCollection), ^id(__unsafe_unretained Class originClass, SEL originCMD, IMP (^originalIMPProvider)(void)) {
-            return ^(UIScreen *selfObject, UITraitCollection *traitCollection) {
-                
-                if (selfObject == UIScreen.mainScreen) {
-                    [UITraitCollection _qmui_notifyUserInterfaceStyleWillChangeForTraitCollection:traitCollection];
-                }
-                
-                // call super
-                void (*originSelectorIMP)(id, SEL, UITraitCollection *);
-                originSelectorIMP = (void (*)(id, SEL, UITraitCollection *))originalIMPProvider();
-                originSelectorIMP(selfObject, originCMD, traitCollection);
-            };
-        });
+        if (QMUIHelper.isMac) {
+            NSString *willChangeTraitCollection = [NSString qmui_stringByConcat:@"_", @"setDefault", @"TraitCollection:", nil];
+            OverrideImplementation([UIScreen class], NSSelectorFromString(willChangeTraitCollection), ^id(__unsafe_unretained Class originClass, SEL originCMD, IMP (^originalIMPProvider)(void)) {
+                return ^(UIScreen *selfObject, UITraitCollection *traitCollection) {
+                    
+                    if (selfObject == UIScreen.mainScreen) {
+                        [UITraitCollection _qmui_setUserInterfaceStyleForTraitCollection:traitCollection];
+                    }
+                    
+                    // call super
+                    void (*originSelectorIMP)(id, SEL, UITraitCollection *);
+                    originSelectorIMP = (void (*)(id, SEL, UITraitCollection *))originalIMPProvider();
+                    originSelectorIMP(selfObject, originCMD, traitCollection);
+                };
+            });
+        } else {
+            NSString *willChangeTraitCollection = [NSString qmui_stringByConcat:@"_", @"parent", @"WillTransitionTo", @"TraitCollection:", nil];
+            OverrideImplementation([UIWindow class], NSSelectorFromString(willChangeTraitCollection), ^id(__unsafe_unretained Class originClass, SEL originCMD, IMP (^originalIMPProvider)(void)) {
+                return ^(UIWindow *selfObject, UITraitCollection *traitCollection) {
+                    
+                    if (selfObject == UIApplication.sharedApplication.qmui_delegateWindow) {
+                        [UITraitCollection _qmui_setUserInterfaceStyleForTraitCollection:traitCollection];
+                    }
+                    
+                    // call super
+                    void (*originSelectorIMP)(id, SEL, UITraitCollection *);
+                    originSelectorIMP = (void (*)(id, SEL, UITraitCollection *))originalIMPProvider();
+                    originSelectorIMP(selfObject, originCMD, traitCollection);
+                };
+            });
+        }
     } oncePerIdentifier:@"UITraitCollection addUserInterfaceStyleWillChangeObserver"];
 }
 
