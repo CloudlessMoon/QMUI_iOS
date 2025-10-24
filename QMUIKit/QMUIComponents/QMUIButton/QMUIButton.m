@@ -54,10 +54,6 @@ const CGFloat QMUIButtonCornerRadiusAdjustsBounds = -1;
 }
 
 - (void)didInitialize {
-    // https://github.com/Tencent/QMUI_iOS/issues/1680
-    [self imageView];
-    [self titleLabel];
-    
     // 默认接管highlighted和disabled的表现，去掉系统默认的表现
     self.adjustsImageWhenHighlighted = NO;
     self.adjustsImageWhenDisabled = NO;
@@ -122,17 +118,7 @@ const CGFloat QMUIButtonCornerRadiusAdjustsBounds = -1;
     ][self.contentVerticalAlignment] integerValue];
     
     BOOL isImageViewShowing = !!self.currentImage;
-    // https://github.com/Tencent/QMUI_iOS/issues/1680
-    UIImageView *imageView = nil;
-    if (isImageViewShowing) {
-        if (forLayout) {
-            imageView = self._qmui_imageView;
-        } else {
-            // 加self.imageView是为了兜底，理论上_qmui_imageView不会为nil
-            imageView = self._qmui_imageView ? : self.imageView;
-        }
-    }
-    QMUILayouterItem *image = [QMUILayouterItem itemWithView:imageView margin:self.imageEdgeInsets];
+    QMUILayouterItem *image = [QMUILayouterItem itemWithView:isImageViewShowing ? (forLayout ? self._qmui_imageView : self.imageView) : nil margin:self.imageEdgeInsets];
     image.visibleBlock = ^BOOL(QMUILayouterItem * _Nonnull aItem) {
         return !!weakSelf.currentImage;
     };
