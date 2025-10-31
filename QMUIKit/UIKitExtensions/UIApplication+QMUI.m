@@ -47,14 +47,12 @@ QMUISynthesizeBOOLProperty(qmui_didFinishLaunching, setQmui_didFinishLaunching)
 
 - (NSArray<__kindof UIWindow *> *)qmui_windows {
     __block NSArray *windows = nil;
-    if (@available(iOS 13.0, *)) {
-        [self.connectedScenes enumerateObjectsUsingBlock:^(UIScene *scene, BOOL *stop) {
-            if ([scene isKindOfClass:UIWindowScene.class] && [scene.session.role isEqualToString:UIWindowSceneSessionRoleApplication]) {
-                windows = [(UIWindowScene *)scene windows];
-                *stop = YES;
-            }
-        }];
-    }
+    [self.connectedScenes enumerateObjectsUsingBlock:^(UIScene *scene, BOOL *stop) {
+        if ([scene isKindOfClass:UIWindowScene.class] && [scene.session.role isEqualToString:UIWindowSceneSessionRoleApplication]) {
+            windows = [(UIWindowScene *)scene windows];
+            *stop = YES;
+        }
+    }];
     if (!windows || windows.count == 0) {
         windows = self.windows;
     }
@@ -63,12 +61,22 @@ QMUISynthesizeBOOLProperty(qmui_didFinishLaunching, setQmui_didFinishLaunching)
 
 - (nullable __kindof UIWindow *)qmui_keyWindow {
     __block UIWindow *keyWindow = nil;
-    [self.qmui_windows enumerateObjectsUsingBlock:^(__kindof UIWindow *window, NSUInteger idx, BOOL *stop) {
-        if (window.isKeyWindow && !window.isHidden) {
-            keyWindow = window;
+    [self.connectedScenes enumerateObjectsUsingBlock:^(UIScene *scene, BOOL *stop) {
+        if ([scene isKindOfClass:UIWindowScene.class] && [scene.session.role isEqualToString:UIWindowSceneSessionRoleApplication]) {
+            [[(UIWindowScene *)scene windows] enumerateObjectsUsingBlock:^(UIWindow *window, NSUInteger idx, BOOL *substop) {
+                if (window.isKeyWindow && !window.isHidden) {
+                    keyWindow = window;
+                    *substop = YES;
+                }
+            }];
             *stop = YES;
         }
     }];
+    if (!keyWindow) {
+        BeginIgnoreDeprecatedWarning
+        keyWindow = self.keyWindow;
+        EndIgnoreDeprecatedWarning
+    }
     if (!keyWindow) {
         keyWindow = self.qmui_delegateWindow;
     }
@@ -77,16 +85,14 @@ QMUISynthesizeBOOLProperty(qmui_didFinishLaunching, setQmui_didFinishLaunching)
 
 - (nullable __kindof UIWindow *)qmui_delegateWindow {
     __block UIWindow *delegateWindow = nil;
-    if (@available(iOS 13.0, *)) {
-        [self.connectedScenes enumerateObjectsUsingBlock:^(UIScene *scene, BOOL *stop) {
-            if ([scene isKindOfClass:UIWindowScene.class] && [scene.session.role isEqualToString:UIWindowSceneSessionRoleApplication]) {
-                if ([scene.delegate respondsToSelector:@selector(window)]) {
-                    delegateWindow = [scene.delegate performSelector:@selector(window)];
-                    *stop = YES;
-                }
+    [self.connectedScenes enumerateObjectsUsingBlock:^(UIScene *scene, BOOL *stop) {
+        if ([scene isKindOfClass:UIWindowScene.class] && [scene.session.role isEqualToString:UIWindowSceneSessionRoleApplication]) {
+            if ([scene.delegate respondsToSelector:@selector(window)]) {
+                delegateWindow = [scene.delegate performSelector:@selector(window)];
+                *stop = YES;
             }
-        }];
-    }
+        }
+    }];
     if (!delegateWindow && [self.delegate respondsToSelector:@selector(window)]) {
         delegateWindow = [self.delegate performSelector:@selector(window)];
     }
