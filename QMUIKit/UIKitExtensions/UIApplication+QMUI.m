@@ -17,6 +17,7 @@
 
 @implementation UIApplication (QMUI)
 
+QMUISynthesizeBOOLProperty(qmui_addedObserver, setQmui_addedObserver)
 QMUISynthesizeBOOLProperty(qmui_didFinishLaunching, setQmui_didFinishLaunching)
 
 + (void)load {
@@ -29,9 +30,9 @@ QMUISynthesizeBOOLProperty(qmui_didFinishLaunching, setQmui_didFinishLaunching)
                 originSelectorIMP = (UIApplication * (*)(id, SEL))originalIMPProvider();
                 UIApplication * result = originSelectorIMP(selfObject, originCMD);
                 
-                if (![result qmui_getBoundBOOLForKey:@"QMUIAddedObserver"]) {
+                if (!result.qmui_addedObserver) {
                     [NSNotificationCenter.defaultCenter addObserver:result selector:@selector(qmui_handleDidFinishLaunchingNotification:) name:UIApplicationDidFinishLaunchingNotification object:nil];
-                    [result qmui_bindBOOL:YES forKey:@"QMUIAddedObserver"];
+                    result.qmui_addedObserver = YES;
                 }
                 
                 return result;
@@ -63,12 +64,17 @@ QMUISynthesizeBOOLProperty(qmui_didFinishLaunching, setQmui_didFinishLaunching)
     __block UIWindow *keyWindow = nil;
     [self.connectedScenes enumerateObjectsUsingBlock:^(UIScene *scene, BOOL *stop) {
         if ([scene isKindOfClass:UIWindowScene.class] && [scene.session.role isEqualToString:UIWindowSceneSessionRoleApplication]) {
-            [[(UIWindowScene *)scene windows] enumerateObjectsUsingBlock:^(UIWindow *window, NSUInteger idx, BOOL *substop) {
-                if (window.isKeyWindow && !window.isHidden) {
-                    keyWindow = window;
-                    *substop = YES;
-                }
-            }];
+            UIWindowScene *windowScene = (UIWindowScene *)scene;
+            if (@available(iOS 15.0, *)) {
+                keyWindow = windowScene.keyWindow;
+            } else {
+                [windowScene.windows enumerateObjectsUsingBlock:^(UIWindow *window, NSUInteger idx, BOOL *substop) {
+                    if (window.isKeyWindow && !window.isHidden) {
+                        keyWindow = window;
+                        *substop = YES;
+                    }
+                }];
+            }
             *stop = YES;
         }
     }];
@@ -100,3 +106,4 @@ QMUISynthesizeBOOLProperty(qmui_didFinishLaunching, setQmui_didFinishLaunching)
 }
 
 @end
+
