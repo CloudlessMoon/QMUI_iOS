@@ -140,25 +140,7 @@ QMUISynthesizeIdCopyProperty(qmui_themeDidChangeBlock, setQmui_themeDidChangeBlo
         BOOL isValidatedEffect = [value isKindOfClass:QMUIThemeVisualEffect.class] && (!manager || [((QMUIThemeVisualEffect *)value).managerName isEqual:manager.name]);
         BOOL isOtherObject = ![value isKindOfClass:UIColor.class] && ![value isKindOfClass:UIImage.class] && ![value isKindOfClass:UIVisualEffect.class];// 支持所有非 color、image、effect 的其他对象，例如 NSAttributedString
         
-        // 切换主题后某些UI未及时响应
-        BOOL needsCopy = NO;
-        if (isValidatedColor) {
-            if ([self isKindOfClass:UIActivityIndicatorView.class] && setter == @selector(setColor:)) {
-                needsCopy = YES;
-            }
-        } else if (isValidatedImage) {
-            // https://github.com/Tencent/QMUI_iOS/issues/1507
-            // Xcode 26.4实测，iOS 13 ～ iOS 26均有问题
-            if ([self isKindOfClass:UIImageView.class] && setter == @selector(setImage:)) {
-                needsCopy = YES;
-            }
-        }
-        
         if (isOtherObject || isValidatedColor || isValidatedImage || isValidatedEffect) {
-            if (needsCopy) {
-                [self performSelector:setter withObject:[value copy]];
-            }
-            // copy后与外部引用不一致，这里再重新设置回去
             [self performSelector:setter withObject:value];
         }
         EndIgnorePerformSelectorLeaksWarning
