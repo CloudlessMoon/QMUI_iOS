@@ -333,6 +333,7 @@ NSString *const kShouldFixTitleViewBugKey = @"kShouldFixTitleViewBugKey";
                 };
             });
             
+#ifdef DEBUG
             // 尚未应用 UIAppearance 就已经修改 bar 的样式的场景，可能导致 bar 样式无法与全局保持一致，所以这里做个提醒
             // https://github.com/Tencent/QMUI_iOS/issues/1451
             // - [UINavigationBar setStandardAppearance:]
@@ -344,7 +345,6 @@ NSString *const kShouldFixTitleViewBugKey = @"kShouldFixTitleViewBugKey";
                     originSelectorIMP = (void (*)(id, SEL, UINavigationBarAppearance *))originalIMPProvider();
                     originSelectorIMP(selfObject, originCMD, firstArgv);
                     
-#ifdef DEBUG
                     // 这里只希望识别 UINavigationController 自带的 navigationBar，不希望处理业务自己 new 的 bar，所以用 superview 是否为 UILayoutContainerView 来作为判断条件。
                     BOOL isSystemBar = [NSStringFromClass(selfObject.superview.class) hasPrefix:@"UILayoutContainer"] && [selfObject.superview.qmui_viewController isKindOfClass:UINavigationController.class];
                     BOOL alreadyMoveToWindow = !!selfObject.window;
@@ -356,9 +356,9 @@ NSString *const kShouldFixTitleViewBugKey = @"kShouldFixTitleViewBugKey";
                     if (isSystemBar && !alreadyMoveToWindow && !isPresenting) {
                         QMUIAssert(NO, @"UINavigationBar (QMUI)", @"试图在 UINavigationBar 尚未添加到 window 上时就修改它的样式，可能导致 UINavigationBar 的样式无法与全局保持一致。");
                     }
-#endif
                 };
             });
+#endif
         }
 #endif
     });
