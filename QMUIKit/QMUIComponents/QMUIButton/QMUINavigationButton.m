@@ -462,8 +462,12 @@ typedef NS_ENUM(NSInteger, QMUINavigationButtonPosition) {
         // 强制修改 contentView 的 directionalLayoutMargins.leading，在使用自定义返回按钮时减小 8
         // Xcode11 beta2 修改私有 view 的 directionalLayoutMargins 会 crash，换个方式
         // -[_UINavigationBarContentView directionalLayoutMargins]
-        NSString *barContentViewString = [NSString qmui_stringByConcat:@"_", @"UINavigationBar", @"ContentView", nil];
-        
+        NSString *barContentViewString;
+        if (QMUIHelper.isUsedLiquidGlass) {
+            barContentViewString = [NSString qmui_stringByConcat:@"UIKit.", @"NavigationBar", @"ContentView", nil];
+        } else {
+            barContentViewString = [NSString qmui_stringByConcat:@"_", @"UINavigationBar", @"ContentView", nil];
+        }
         OverrideImplementation(NSClassFromString(barContentViewString), @selector(directionalLayoutMargins), ^id(__unsafe_unretained Class originClass, SEL originCMD, IMP (^originalIMPProvider)(void)) {
             return ^NSDirectionalEdgeInsets(UIView *selfObject) {
                 
