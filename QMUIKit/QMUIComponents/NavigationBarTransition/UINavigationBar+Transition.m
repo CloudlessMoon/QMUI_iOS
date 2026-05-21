@@ -294,6 +294,14 @@ static char kAssociatedObjectKey_copyStylesToBar;
         [self.parentViewController.view bringSubviewToFront:self];
         UIView *backgroundView = self.originalNavigationBar.qmui_backgroundView;
         CGRect rect = [backgroundView.superview convertRect:backgroundView.frame toView:self.parentViewController.view];
+        if (QMUIHelper.isUsedLiquidGlass) {
+            // 不需要处理
+        } else {
+            // Xcode 26.x编译后，灵动岛机型会多出一块，感觉是UIKit的bug🤷‍♂️，暂时这么处理吧
+            if (ceil(CGRectGetMinY(rect)) == -5) {
+                rect.size.height += CGRectGetMinY(rect);
+            }
+        }
         [CALayer qmui_performWithoutAnimation:^{
             // push/pop 过程中系统的导航栏转换过来的 x 可能是 112、-112
             // iOS 26上，y 可能是 -113
