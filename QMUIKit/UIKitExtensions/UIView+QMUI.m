@@ -36,12 +36,12 @@ QMUISynthesizeIdCopyProperty(qmui_frameDidChangeBlock, setQmui_frameDidChangeBlo
         OverrideImplementation([UIView class], @selector(setTintColor:), ^id(__unsafe_unretained Class originClass, SEL originCMD, IMP (^originalIMPProvider)(void)) {
             return ^(UIView *selfObject, UIColor *tintColor) {
                 
+                selfObject.qmui_tintColorCustomized = !!tintColor;
+                
                 // call super
                 void (*originSelectorIMP)(id, SEL, UIColor *);
                 originSelectorIMP = (void (*)(id, SEL, UIColor *))originalIMPProvider();
                 originSelectorIMP(selfObject, originCMD, tintColor);
-                
-                selfObject.qmui_tintColorCustomized = !!tintColor;
             };
         });
         
