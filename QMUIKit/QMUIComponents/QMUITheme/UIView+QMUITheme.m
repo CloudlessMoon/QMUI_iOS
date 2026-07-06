@@ -208,11 +208,20 @@ QMUISynthesizeIdCopyProperty(qmui_themeDidChangeBlock, setQmui_themeDidChangeBlo
 QMUISynthesizeIdStrongProperty(qmuiTheme_themeColorProperties, setQmuiTheme_themeColorProperties)
 
 - (BOOL)_qmui_visible {
-    BOOL hidden = self.hidden;
-    if ([self respondsToSelector:@selector(prepareForReuse)]) {
-        hidden = NO;// UITableViewCell 在 prepareForReuse 前会被 setHidden:YES，然后再被 setHidden:NO，然而后者是无效的，执行完之后依然是 hidden 为 YES，导致认为非 visible 而无法触发 themeDidChange，所以这里对 UITableViewCell 做特殊处理
+    BOOL isHidden;
+    if ([self isKindOfClass:UITableViewCell.class] || [self isKindOfClass:UICollectionReusableView.class]) {
+        /// UITableViewCell等Cell 在 prepareForReuse 前会被 setHidden:YES，然后再被 setHidden:NO，然而后者是无效的，执行完之后依然是 hidden 为 YES，导致认为非 visible 而无法触发 themeDidChange，所以这里对 UITableViewCell 做特殊处理
+        isHidden = NO;
+    } else {
+        isHidden = self.isHidden;
     }
-    return !hidden && self.alpha > 0.01 && self.window;
+    BOOL hasWindow;
+    if ([self isKindOfClass:UIWindow.class]) {
+        hasWindow = YES;
+    } else {
+        hasWindow = !!self.window;
+    }
+    return !isHidden && hasWindow && self.alpha > 0.01;
 }
 
 - (void)_qmui_themeDidChangeByManager:(QMUIThemeManager *)manager identifier:(__kindof NSObject<NSCopying> *)identifier theme:(__kindof NSObject *)theme shouldEnumeratorSubviews:(BOOL)shouldEnumeratorSubviews {
