@@ -98,7 +98,6 @@
                                        NSStringFromClass(UISearchBar.class):                        @[NSStringFromSelector(@selector(barTintColor)),
                                                                                                       NSStringFromSelector(@selector(qmui_placeholderColor)),
                                                                                                       NSStringFromSelector(@selector(qmui_textColor)),],
-                                       NSStringFromClass(UITextField.class):                        @[NSStringFromSelector(@selector(attributedText)),],
                                        NSStringFromClass(UIView.class):                             @[NSStringFromSelector(@selector(tintColor)),
                                                                                                       NSStringFromSelector(@selector(backgroundColor)),
                                                                                                       NSStringFromSelector(@selector(qmui_borderColor)),
@@ -142,7 +141,7 @@
 //                                                                                                      NSStringFromSelector(@selector(shadowColor)),
 //                                                                                                      NSStringFromSelector(@selector(highlightedTextColor)),],
 //                                       NSStringFromClass(UITextView.class):                         @[NSStringFromSelector(@selector(attributedText)),],
-
+//                                       NSStringFromClass(UITextField.class):                        @[NSStringFromSelector(@selector(attributedText)),],
                                        };
                 }
                 [classRegisters enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull classString, NSArray<NSString *> * _Nonnull getters, BOOL * _Nonnull stop) {

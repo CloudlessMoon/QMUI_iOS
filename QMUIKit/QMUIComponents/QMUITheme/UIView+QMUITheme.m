@@ -147,13 +147,9 @@ QMUISynthesizeIdCopyProperty(qmui_themeDidChangeBlock, setQmui_themeDidChangeBlo
     }];
     
     // 特殊的 view 特殊处理
-    // iOS 10-11 里当 UILabel.attributedText 的文字颜色都相同时，也无法使用 setNeedsDisplay 刷新样式，但只要某个 range 颜色不同就没问题，iOS 9、12-13 也没问题，这个通过 UILabel (QMUIThemeCompatibility) 兼容。
     if ([self isKindOfClass:UILabel.class]) {
         [self setNeedsDisplay];
-    }
-    
-    if ([self isKindOfClass:UITextView.class]) {
-#ifdef IOS16_SDK_ALLOWED
+    } else if ([self isKindOfClass:UITextView.class]) {
         if (@available(iOS 16.0, *)) {
             // iOS 16 里使用 TextKit 2 的输入框无法通过 setNeedsDisplay 去刷新文本颜色了，所以改为用这种方式去刷新
             // 以下语句对 iOS 16 里因为访问 UITextView.layoutManager 而回退到 TextKit 1 的输入框无效，但由于 TextKit 1 本来就可以正常刷新，所以没问题。
@@ -164,11 +160,21 @@ QMUISynthesizeIdCopyProperty(qmui_themeDidChangeBlock, setQmui_themeDidChangeBlo
                 [textView.textLayoutManager invalidateLayoutForRange:textRange];
             }
         } else {
-#endif
             [self setNeedsDisplay];
-#ifdef IOS16_SDK_ALLOWED
         }
-#endif
+    } else if ([self isKindOfClass:UITextField.class]) {
+        if (@available(iOS 16.0, *)) {
+            UITextField *textField = (UITextField *)self;
+            NSTextContainer *textContainer = [textField qmui_valueForKey:@"textContainer"];
+            if ([textContainer isKindOfClass:NSTextContainer.class]) {
+                NSTextRange *textRange = textContainer.textLayoutManager.textContentManager.documentRange;
+                if (textRange) {
+                    [textContainer.textLayoutManager invalidateLayoutForRange:textRange];
+                }
+            }
+        } else {
+            [self setNeedsDisplay];
+        }
     }
     
     // 输入框、搜索框的键盘跟随主题变化
