@@ -285,7 +285,9 @@ static char kAssociatedObjectKey_copyStylesToBar;
 - (void)didAddSubview:(UIView *)subview {
     [super didAddSubview:subview];
     if (subview == self.qmui_backgroundView) {
-        [subview qmui_performSelector:NSSelectorFromString(@"updateBackground") withArguments:nil];
+        BeginIgnorePerformSelectorLeaksWarning
+        [subview performSelector:NSSelectorFromString(@"updateBackground")];
+        EndIgnorePerformSelectorLeaksWarning
     }
 }
 

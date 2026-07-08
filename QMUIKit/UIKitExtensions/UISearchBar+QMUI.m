@@ -925,7 +925,9 @@ static CGFloat seachBarDefaultActiveHeight;
         sel = NSSelectorFromString([NSString qmui_stringByConcat:@"_", @"searchBar", nil]);
     }
     if ([self respondsToSelector:sel]) {
-        return [self qmui_performSelector:sel withArguments:nil];
+        BeginIgnorePerformSelectorLeaksWarning
+        return [self performSelector:sel];
+        EndIgnorePerformSelectorLeaksWarning
     } else {
         return nil;
     }
@@ -937,7 +939,9 @@ static CGFloat seachBarDefaultActiveHeight;
         sel = NSSelectorFromString([NSString qmui_stringByConcat:@"_", @"placeholderLabel", nil]);
     }
     if ([self respondsToSelector:sel]) {
-        return [self qmui_performSelector:sel withArguments:nil];
+        BeginIgnorePerformSelectorLeaksWarning
+        return [self performSelector:sel];
+        EndIgnorePerformSelectorLeaksWarning
     } else {
         return nil;
     }
