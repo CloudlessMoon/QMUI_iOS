@@ -162,8 +162,10 @@ static char kAssociatedObjectKey_badgeOffsetLandscape;
 
 - (void)setQmui_badgeView:(__kindof UIView *)qmui_badgeView {
     self.qmui_view.qmui_badgeView = qmui_badgeView;
-    /// iOS 26，需要改成block？
-    // self.qmui_selectedView.qmui_badgeView = qmui_badgeView;
+    
+    if (QMUIHelper.isUsedLiquidGlass) {
+        QMUIAssert(NO, @"UIBarItem (QMUIBadge)", @"Not supported");
+    }
 }
 
 - (__kindof UIView *)qmui_badgeView {
@@ -241,8 +243,10 @@ static char kAssociatedObjectKey_updatesIndicatorOffsetLandscape;
 
 - (void)setQmui_updatesIndicatorView:(__kindof UIView *)qmui_updatesIndicatorView {
     self.qmui_view.qmui_updatesIndicatorView = qmui_updatesIndicatorView;
-    /// iOS 26，需要改成block？
-    // self.qmui_selectedView.qmui_updatesIndicatorView = qmui_updatesIndicatorView;
+    
+    if (QMUIHelper.isUsedLiquidGlass) {
+        QMUIAssert(NO, @"UIBarItem (QMUIBadge)", @"Not supported");
+    }
 }
 
 - (UIView *)qmui_updatesIndicatorView {
