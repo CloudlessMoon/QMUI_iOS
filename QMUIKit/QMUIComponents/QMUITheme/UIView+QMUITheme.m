@@ -150,7 +150,10 @@ QMUISynthesizeIdCopyProperty(qmui_themeDidChangeBlock, setQmui_themeDidChangeBlo
     if ([self isKindOfClass:UILabel.class]) {
         [self setNeedsDisplay];
     } else if ([self isKindOfClass:UITextView.class]) {
+        [self setNeedsDisplay];
+        
         if (@available(iOS 16.0, *)) {
+            // 同UITextField
             // iOS 16 里使用 TextKit 2 的输入框无法通过 setNeedsDisplay 去刷新文本颜色了，所以改为用这种方式去刷新
             // 以下语句对 iOS 16 里因为访问 UITextView.layoutManager 而回退到 TextKit 1 的输入框无效，但由于 TextKit 1 本来就可以正常刷新，所以没问题。
             // 注意要考虑输入框内可能存在多种颜色的富文本场景
@@ -159,10 +162,10 @@ QMUISynthesizeIdCopyProperty(qmui_themeDidChangeBlock, setQmui_themeDidChangeBlo
             if (textRange) {
                 [textView.textLayoutManager invalidateLayoutForRange:textRange];
             }
-        } else {
-            [self setNeedsDisplay];
         }
     } else if ([self isKindOfClass:UITextField.class]) {
+        [self setNeedsDisplay];
+        
         if (@available(iOS 16.0, *)) {
             UITextField *textField = (UITextField *)self;
             NSTextContainer *textContainer = [textField qmui_valueForKey:@"textContainer"];
@@ -172,8 +175,6 @@ QMUISynthesizeIdCopyProperty(qmui_themeDidChangeBlock, setQmui_themeDidChangeBlo
                     [textContainer.textLayoutManager invalidateLayoutForRange:textRange];
                 }
             }
-        } else {
-            [self setNeedsDisplay];
         }
     }
     
