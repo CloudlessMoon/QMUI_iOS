@@ -482,13 +482,6 @@ QMUISynthesizeIdStrongProperty(qmui_specifiedTextColor, setQmui_specifiedTextCol
         return NO;// 只处理前后两个界面都是 QMUI 系列的场景
     }
     
-    BOOL vc1Clips = vc1.isViewLoaded && vc1.view.clipsToBounds && vc1.qmui_navigationBarMaxYInViewCoordinator < NavigationContentTopConstant;
-    BOOL vc2Clips = vc2.isViewLoaded && vc2.view.clipsToBounds && vc2.qmui_navigationBarMaxYInViewCoordinator < NavigationContentTopConstant;
-    if (vc1Clips || vc2Clips) {
-        QMUILogWarn(@"UINavigationController (NavigationBarTransition)", @"因界面布局原因导致无法优化导航栏动画，vc1 = %@，maxY1 = %.0f, vc2 = %@，maxY2 = %.0f", vc1, vc1.qmui_navigationBarMaxYInViewCoordinator, vc2, vc2.qmui_navigationBarMaxYInViewCoordinator);
-        return NO;// 左右两个界面只要其中某个界面无法完整显示 navigationBar，都不进行动画优化
-    }
-    
     if ([vc1.navigationController.delegate respondsToSelector:@selector(navigationController:animationControllerForOperation:fromViewController:toViewController:)]) {
         // 说明可能有自定义的系统转场动画
         BOOL a = [vc1 respondsToSelector:@selector(shouldCustomizeNavigationBarTransitionIfUsingCustomTransitionForOperation:fromViewController:toViewController:)] ? [vc1 shouldCustomizeNavigationBarTransitionIfUsingCustomTransitionForOperation:operation fromViewController:vc1 toViewController:vc2] : NO;
