@@ -278,7 +278,7 @@ static char kAssociatedObjectKey_updatesIndicatorOffsetLandscape;
             return nil;
         }
         UIView *platterView = view.superview.superview;
-        if (![NSStringFromClass(platterView.class) hasSuffix:@"_UITabBarPlatterView"]) {
+        if (![NSStringFromClass(platterView.class) hasSuffix:@"_UITabBarPlatterView"] && ![NSStringFromClass(platterView.class) hasSuffix:@"_UITabBarItemPlatterView"]) {
             return nil;
         }
         UIView *selectedContentView = platterView.subviews.firstObject;
