@@ -170,6 +170,19 @@ QMUISynthesizeIdStrongProperty(qmui_specifiedTextColor, setQmui_specifiedTextCol
                 originSelectorIMP(selfObject, originCMD, firstArgv);
             };
         });
+
+        // setViewControllers 换栈后导航栏状态可能停留在上一个界面：换栈不一定伴随 appearance——系统转场中的栈迁移
+        // （如 UISplitViewController 折叠/展开 delegate 里的换栈）、可见性不翻转的替换、离屏装配栈，新栈顶的
+        // viewWillAppear: 都不会触发，上面的 render 也就不会执行。这里借助 navigationAction 机制在 DidSet 后对新栈顶补一次。
+        // 不能对 setViewControllers:animated: 再做 OverrideImplementation：UINavigationController+QMUI.m 已 swizzle 该
+        // selector，跨分类 +load 顺序不可控；animated 的换栈会正常走 appearance + 假 bar 转场，无需也不应补
+        ExtendImplementationOfVoidMethodWithoutArguments([UINavigationController class], @selector(qmui_didInitialize), ^(UINavigationController *selfObject) {
+            [selfObject qmui_addNavigationActionDidChangeBlock:^(QMUINavigationAction action, BOOL animated, __kindof UINavigationController * _Nullable weakNavigationController, __kindof UIViewController * _Nullable appearingViewController, NSArray<__kindof UIViewController *> * _Nullable disappearingViewControllers) {
+                if (action == QMUINavigationActionDidSet && !animated && appearingViewController) {
+                    [appearingViewController renderNavigationBarStyleAnimated:NO];
+                }
+            }];
+        });
         
         OverrideImplementation([UIViewController class], @selector(viewWillLayoutSubviews), ^id(__unsafe_unretained Class originClass, SEL originCMD, IMP (^originalIMPProvider)(void)) {
             return ^(UIViewController *selfObject) {
