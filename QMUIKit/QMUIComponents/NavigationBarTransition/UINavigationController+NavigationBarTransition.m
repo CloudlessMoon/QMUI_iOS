@@ -180,6 +180,12 @@ QMUISynthesizeIdStrongProperty(qmui_specifiedTextColor, setQmui_specifiedTextCol
             [selfObject qmui_addNavigationActionDidChangeBlock:^(QMUINavigationAction action, BOOL animated, __kindof UINavigationController * _Nullable weakNavigationController, __kindof UIViewController * _Nullable appearingViewController, NSArray<__kindof UIViewController *> * _Nullable disappearingViewControllers) {
                 if (action == QMUINavigationActionDidSet && !animated && appearingViewController) {
                     [appearingViewController renderNavigationBarStyleAnimated:NO];
+                    // setViewControllers后会丢失titleView
+                    UIView *titleView = appearingViewController.navigationItem.titleView;
+                    if (titleView != nil) {
+                        appearingViewController.navigationItem.titleView = nil;
+                        appearingViewController.navigationItem.titleView = titleView;
+                    }
                 }
             }];
         });
