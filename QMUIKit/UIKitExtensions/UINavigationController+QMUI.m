@@ -259,7 +259,10 @@ QMUISynthesizeIdStrongProperty(qmui_interactiveGestureDelegator, setQmui_interac
             if (QMUIHelper.isUsedLiquidGlass) {
                 // iOS 26液态玻璃下，转场动画可以被打断
                 // action的设置顺序会变为: DidPush -> WillPop -> PushCompleted -> Unknow -> DidPop ...
-                result = action == QMUINavigationActionUnknow || action == QMUINavigationActionDidPush || action == QMUINavigationActionDidSet;
+                result = (action == QMUINavigationActionUnknow ||
+                          action == QMUINavigationActionDidPop ||
+                          action == QMUINavigationActionDidPush ||
+                          action == QMUINavigationActionDidSet);
             } else {
                 result = action == QMUINavigationActionUnknow;
             }
